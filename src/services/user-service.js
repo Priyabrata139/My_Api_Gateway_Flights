@@ -2,6 +2,13 @@ const {StatusCodes} = require('http-status-codes');
 
 const { UserRepository } = require('../repositories');
 const AppError = require('../utils/errors/app-error');
+const {User} = require('../models');
+
+const useBcrypt = require('sequelize-bcrypt');
+
+const { ServerConfig } = require('../config')
+
+var jwt = require('jsonwebtoken');
 
 
 const userRepository = new UserRepository();
@@ -24,6 +31,38 @@ async function createUser(data) {
 }
 
 
+async function signin(data) {
+    try {
+        const user = await userRepository.findOne({email:data.email});
+        if (!user) {
+            throw new AppError(['user not found with this email'],StatusCodes.NOT_FOUND);
+        }
+         console.log(data.password);
+         
+        if (user.authenticate(data.password)) {
+            var token = jwt.sign( data, ServerConfig.JWT_SECRET, { expiresIn: ServerConfig.JWT_EXPIRY });
+            return {token: token};
+        }
+        else{
+            throw new AppError(['Wrong password'],StatusCodes.BAD_REQUEST);
+        }
+
+
+    } catch(error) {
+        console.log(error);
+        
+        if (error instanceof AppError) {
+            throw error;
+        }
+        throw new AppError('Cannot validate the user', StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+
+
+
+
 module.exports = {
-    createUser
+    createUser,
+    signin
 }

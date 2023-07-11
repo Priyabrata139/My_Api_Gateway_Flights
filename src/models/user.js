@@ -2,6 +2,8 @@
 const {
   Model
 } = require('sequelize');
+const useBcrypt = require('sequelize-bcrypt');
+const { ServerConfig } = require('../config');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -32,6 +34,11 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'User',
+  });
+  useBcrypt(User, {
+    field: 'password',
+    rounds: +ServerConfig.ROUNDS,
+    compare: ServerConfig.METHOD
   });
   return User;
 };

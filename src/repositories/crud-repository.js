@@ -35,6 +35,11 @@ class CrudRepository {
         return response;
     }
 
+    async findOne(data){
+        const response = await this.model.findOne({where:data});
+        return response;
+    }
+
     async update(id, data) { // data -> {col: value, ....}
         const response = await this.model.update(data, {
             where: {

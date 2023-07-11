@@ -9,7 +9,11 @@ const router = express.Router();
 
 // router.use('/airplanes', airplaneRoutes);
 
+
 router.post('/signup',UserMiddlewares.validateCreateRequest, UserController.signup);
+
+router.post('/signin',UserMiddlewares.validateSinginRequest, UserController.signin);
+
 
 // router.get('/info', InfoController.info);
 
