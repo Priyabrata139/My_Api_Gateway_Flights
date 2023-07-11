@@ -63,14 +63,19 @@ async function isAuthenticated(token) {
     try {
         var decoded = jwt.verify(token, ServerConfig.JWT_SECRET);
         const user = await userRepository.findOne({email:decoded.email});
+        console.log(decoded);
         if (!user) {
             throw new AppError('No user found', StatusCodes.NOT_FOUND);
         }
         console.log(user);
         return user.id;
     } catch (error) {
+        console.log(error.name);
         if(error.name == 'JsonWebTokenError'){
             throw new AppError(['invalid jwt token'],StatusCodes.BAD_REQUEST);
+        }
+        if (error.name == 'TokenExpiredError') {
+            throw new AppError(['jwt token expired'],StatusCodes.BAD_REQUEST);
         }
         if(error instanceof AppError) throw error;
         throw new AppError(['can\'t authenticate the jwt token'], StatusCodes.INTERNAL_SERVER_ERROR);
