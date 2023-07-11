@@ -1,7 +1,7 @@
 const express = require('express');
 
-const { UserController } = require('../../controllers');
-const { UserMiddlewares } = require('../../middlewares');
+const { UserController, InfoController } = require('../../controllers');
+const { UserMiddlewares, Infomiddlewares } = require('../../middlewares');
 
 // const airplaneRoutes = require('./airplane-routes');
 
@@ -15,7 +15,7 @@ router.post('/signup',UserMiddlewares.validateCreateRequest, UserController.sign
 router.post('/signin',UserMiddlewares.validateSinginRequest, UserController.signin);
 
 
-// router.get('/info', InfoController.info);
+router.get('/info',Infomiddlewares.checkAuth, InfoController.info);
 
 
 module.exports = router;

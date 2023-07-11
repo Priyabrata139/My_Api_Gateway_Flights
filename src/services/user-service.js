@@ -43,7 +43,7 @@ async function signin(data) {
             var token = jwt.sign( data, ServerConfig.JWT_SECRET, { expiresIn: ServerConfig.JWT_EXPIRY });
             return {token: token};
         }
-        else{
+        else{ 
             throw new AppError(['Wrong password'],StatusCodes.BAD_REQUEST);
         }
 
@@ -59,10 +59,29 @@ async function signin(data) {
 }
 
 
+async function isAuthenticated(token) {
+    try {
+        var decoded = jwt.verify(token, ServerConfig.JWT_SECRET);
+        const user = await userRepository.findOne({email:decoded.email});
+        if (!user) {
+            throw new AppError('No user found', StatusCodes.NOT_FOUND);
+        }
+        console.log(user);
+        return user.id;
+    } catch (error) {
+        if(error.name == 'JsonWebTokenError'){
+            throw new AppError(['invalid jwt token'],StatusCodes.BAD_REQUEST);
+        }
+        if(error instanceof AppError) throw error;
+        throw new AppError(['can\'t authenticate the jwt token'], StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
 
 
 
 module.exports = {
     createUser,
-    signin
+    signin,
+    isAuthenticated
 }

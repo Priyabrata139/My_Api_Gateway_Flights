@@ -1,4 +1,5 @@
 module.exports = {
     
-    UserMiddlewares: require('./user-middleware')
+    UserMiddlewares: require('./user-middleware'),
+    Infomiddlewares: require('./info-middleware')
 }
