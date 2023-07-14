@@ -48,8 +48,28 @@ async function signin(req, res) {
     }
 }
 
+async function addUserRole(req, res) {
+    try {
+        const response = await UserService.addRole({
+            userId: req.body.userId,
+            role: req.body.role
+        });
+        SuccessResponse.data = response;
+        
+        return res.
+                  status(StatusCodes.ACCEPTED)
+                  .json(SuccessResponse);
+    } catch (error) {
+        ErrorResponse.error = error;
+        return res.
+        status(error.statusCode)
+        .json(ErrorResponse);
+    }
+}
+
 
 module.exports= {
     signup,
-    signin
+    signin,
+    addUserRole
 }

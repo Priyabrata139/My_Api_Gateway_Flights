@@ -1,6 +1,6 @@
 const {StatusCodes} = require('http-status-codes');
 
-const { UserRepository,RoleRepository } = require('../repositories');
+const { UserRepository,RoleRepository, User_RoleRepository } = require('../repositories');
 const AppError = require('../utils/errors/app-error');
 const {User} = require('../models');
 
@@ -9,12 +9,14 @@ const useBcrypt = require('sequelize-bcrypt');
 const { ServerConfig } = require('../config')
 
 var jwt = require('jsonwebtoken');
+
 const {Role_enum} = require('../utils/enums');
 
 const userRepository = new UserRepository();
 
 const roleRepository = new RoleRepository();
 
+const user_roleRepository = new User_RoleRepository();
 
 async function createUser(data) {
     try {
@@ -88,10 +90,73 @@ async function isAuthenticated(token) {
 }
 
 
+async function isAdmin(data) {
+    try {
+        // const user = userRepository.get(data.user);
+        // console.log('data=', data); 
+        const userId = data.userId;
+        const roleObj = await roleRepository.getRoleByName(Role_enum.ADMIN);
+        const roleId = roleObj.id;
+        
+        const user_role = await user_roleRepository.getUser_role({
+            userId,
+            roleId
+        });
+        if (user_role) {
+            return true;
+        }
+        return false;
+        
+        
+    } catch (error) {
+        throw new AppError(['something went wrong while admin authoriation'], StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+
+async function addRole(data) {
+    try {
+        const user = await userRepository.get(data.userId);
+        if (!user) {
+            throw new AppError(['user not found'], StatusCodes.NOT_FOUND);
+        }
+        const Role = await roleRepository.getRoleByName(data.role);
+        if (!Role) {
+            throw new AppError([`${data.role} role is not exsist`], StatusCodes.BAD_REQUEST);
+        }
+
+
+        const userId = data.userId;
+        const roleObj = await roleRepository.getRoleByName(data.role);
+        const roleId = roleObj.id;
+        
+        const user_role = await user_roleRepository.getUser_role({
+            userId,
+            roleId
+        });
+        if (user_role) {
+            throw new AppError([`This user is already registered as ${data.role}`], StatusCodes.BAD_REQUEST);
+        }
+
+        const response = await user.addRole(Role);
+
+        return response;
+
+    } catch (error) {
+        if (error instanceof AppError) {
+           throw error; 
+        }
+        throw new AppError(['something went wrong while adding user roles'], StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+
 
 
 module.exports = {
     createUser,
     signin,
-    isAuthenticated
+    isAuthenticated,
+    isAdmin,
+    addRole
 }

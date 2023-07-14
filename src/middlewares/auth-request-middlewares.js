@@ -14,8 +14,9 @@ async function checkAuth(req, res, next) {
     if (response) {
         req.user = response;
         console.log('response', response);
-        next();
+       
     }
+    next();
     console.log(response);
     } catch (error) {
         ErrorResponse.error = error;
@@ -26,7 +27,24 @@ async function checkAuth(req, res, next) {
    
 }
 
+async function isAdmin(req, res, next) {
+   try {
+    const admin = await UserService.isAdmin({userId: req.user});
+    if (!admin) {
+       throw new AppError(['Only admin can add roles'], StatusCodes.BAD_REQUEST);
+    }
+    next();
+    
+   } catch (error) {
+    ErrorResponse.error = error;
+        return res
+        .status(error.statusCode)
+        .json(ErrorResponse);}
+   
+}
+
 module.exports={
     
-    checkAuth
+    checkAuth,
+    isAdmin
 }
