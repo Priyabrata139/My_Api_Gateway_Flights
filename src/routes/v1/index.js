@@ -1,21 +1,22 @@
 const express = require('express');
 
-const { UserController, InfoController } = require('../../controllers');
-const { UserMiddlewares, Infomiddlewares } = require('../../middlewares');
+const {  InfoController } = require('../../controllers');
+const { AuthRequestMiddlewares } = require('../../middlewares');
 
-// const airplaneRoutes = require('./airplane-routes');
+const userRoutes = require('./user-route');
 
 const router = express.Router();
 
 // router.use('/airplanes', airplaneRoutes);
 
 
-router.post('/signup',UserMiddlewares.validateCreateRequest, UserController.signup);
+// router.post('/signup',UserMiddlewares.validateCreateRequest, UserController.signup);
 
-router.post('/signin',UserMiddlewares.validateSinginRequest, UserController.signin);
+// router.post('/signin',UserMiddlewares.validateSinginRequest, UserController.signin);
 
+router.get('/info',AuthRequestMiddlewares.checkAuth, InfoController.info);
 
-router.get('/info',Infomiddlewares.checkAuth, InfoController.info);
+router.use('/user',userRoutes);
 
 
 module.exports = router;

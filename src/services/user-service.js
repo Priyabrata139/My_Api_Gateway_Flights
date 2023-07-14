@@ -1,6 +1,6 @@
 const {StatusCodes} = require('http-status-codes');
 
-const { UserRepository } = require('../repositories');
+const { UserRepository,RoleRepository } = require('../repositories');
 const AppError = require('../utils/errors/app-error');
 const {User} = require('../models');
 
@@ -9,13 +9,18 @@ const useBcrypt = require('sequelize-bcrypt');
 const { ServerConfig } = require('../config')
 
 var jwt = require('jsonwebtoken');
-
+const {Role_enum} = require('../utils/enums');
 
 const userRepository = new UserRepository();
+
+const roleRepository = new RoleRepository();
+
 
 async function createUser(data) {
     try {
         const user = await userRepository.create(data);
+        const customerRole = await roleRepository.getRoleByName(Role_enum.CUSTOMER);
+        await user.addRole(customerRole);
         return user;
     } catch(error) {
         console.log(error);
