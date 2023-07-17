@@ -52,6 +52,7 @@ async function passRole(req, res, next) {
     });
     
     req.headers['user-roles'] = rolesArray;
+    req.headers['user'] = req.user;
     // req.setHeader('user-roles', rolesArray);
 
     

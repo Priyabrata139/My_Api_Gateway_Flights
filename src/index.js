@@ -12,7 +12,7 @@ const app = express();
 
 app.use('/flightsService',AuthRequestMiddlewares.checkAuth, AuthRequestMiddlewares.passRole,createProxyMiddleware(proxy.flightsServiceProxy));
 
-app.use('/bookingsService',AuthRequestMiddlewares.checkAuth, createProxyMiddleware(proxy.bookingServiceProxy));
+app.use('/bookingsService',AuthRequestMiddlewares.checkAuth, AuthRequestMiddlewares.passRole, createProxyMiddleware(proxy.bookingServiceProxy));
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
