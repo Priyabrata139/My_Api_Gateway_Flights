@@ -11,13 +11,11 @@ async function checkAuth(req, res, next) {
             throw new AppError(['x-access-token is missing in the incomeing request in the correct form'],StatusCodes.BAD_REQUEST);
         }
         const response =await UserService.isAuthenticated(token);
-    if (response) {
+        if (response) {
         req.user = response;
-        console.log('response', response);
-       
-    }
-    next();
-    console.log(response);
+    
+        next();
+        }
     } catch (error) {
         ErrorResponse.error = error;
         return res

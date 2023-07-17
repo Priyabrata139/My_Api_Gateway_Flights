@@ -74,7 +74,6 @@ async function isAuthenticated(token) {
         if (!user) {
             throw new AppError('No user found', StatusCodes.NOT_FOUND);
         }
-        console.log(user);
         return user.id;
     } catch (error) {
         console.log(error.name);
