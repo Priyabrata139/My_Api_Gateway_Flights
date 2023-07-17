@@ -40,9 +40,36 @@ async function isAdmin(req, res, next) {
         .json(ErrorResponse);}
    
 }
+async function passRole(req, res, next) {
+    try {
+     const userRoles = await UserService.getRole({userId: req.user});
+
+    const rolesArray=[];
+
+    userRoles.forEach(role => {
+    
+        rolesArray.push(role.name);
+    });
+    
+    req.headers['user-roles'] = rolesArray;
+    // req.setHeader('user-roles', rolesArray);
+
+    
+     next();
+     
+    } catch (error) {
+        console.log(error);
+     ErrorResponse.error = error;
+         return res
+         .status(error.statusCode)
+         .json(ErrorResponse);}
+    
+ }
+
 
 module.exports={
     
     checkAuth,
-    isAdmin
+    isAdmin,
+    passRole
 }

@@ -10,9 +10,7 @@ const { AuthRequestMiddlewares } = require('./middlewares');
 const app = express();
 
 
-
-
-app.use('/flightsService',AuthRequestMiddlewares.checkAuth, createProxyMiddleware(proxy.flightsServiceProxy));
+app.use('/flightsService',AuthRequestMiddlewares.checkAuth, AuthRequestMiddlewares.passRole,createProxyMiddleware(proxy.flightsServiceProxy));
 
 app.use('/bookingsService',AuthRequestMiddlewares.checkAuth, createProxyMiddleware(proxy.bookingServiceProxy));
 

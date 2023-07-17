@@ -152,10 +152,30 @@ async function addRole(data) {
 
 
 
+async function getRole(data) {
+    try {
+        const user = await userRepository.get(data.userId);
+        if (!user) {
+            throw new AppError(['user not found'], StatusCodes.NOT_FOUND);
+        }
+
+        const response = user.getRole();
+        return response;
+
+    } catch (error) {
+        if (error instanceof AppError) {
+           throw error; 
+        }
+        throw new AppError(['something went wrong while fatching user roles'], StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+
 module.exports = {
     createUser,
     signin,
     isAuthenticated,
     isAdmin,
-    addRole
+    addRole,
+    getRole
 }
