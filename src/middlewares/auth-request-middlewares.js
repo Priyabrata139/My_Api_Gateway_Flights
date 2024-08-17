@@ -1,76 +1,85 @@
-const { StatusCodes } = require('http-status-codes');
+const { StatusCodes } = require("http-status-codes");
 
-const { ErrorResponse } = require('../utils/common');
-const AppError = require('../utils/errors/app-error');
-const { UserService } = require('../services');
+const { ErrorResponse } = require("../utils/common");
+const AppError = require("../utils/errors/app-error");
+const { UserService } = require("../services");
+
+const { isPublicRequest } = require("../utils/authUtil/authUtil");
 
 async function checkAuth(req, res, next) {
-    try {
-        const token = req.headers['x-access-token'];
-        if (!token) {
-            throw new AppError(['x-access-token is missing in the incomeing request in the correct form'],StatusCodes.BAD_REQUEST);
-        }
-        const response =await UserService.isAuthenticated(token);
-        if (response) {
-        req.user = response;
-    
-        next();
-        }
-    } catch (error) {
-        ErrorResponse.error = error;
-        return res
-        .status(error.statusCode)
-        .json(ErrorResponse);
+  try {
+    console.log("req=", req.url);
+    const incomeingUrl = req.url;
+    const incomeingMethod = req.method;
+
+    if (isPublicRequest(incomeingUrl, incomeingMethod)) {
+      next();
+      return;
     }
-   
+    const token = req.headers["x-access-token"];
+    if (!token) {
+      throw new AppError(
+        [
+          "x-access-token is missing in the incomeing request in the correct form",
+        ],
+        StatusCodes.BAD_REQUEST
+      );
+    }
+    const response = await UserService.isAuthenticated(token);
+    if (response) {
+      req.user = response;
+
+      next();
+    }
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
 }
 
 async function isAdmin(req, res, next) {
-   try {
-    const admin = await UserService.isAdmin({userId: req.user});
+  try {
+    const admin = await UserService.isAdmin({ userId: req.user });
     if (!admin) {
-       throw new AppError(['Only admin can add roles'], StatusCodes.BAD_REQUEST);
+      throw new AppError(["Only admin can add roles"], StatusCodes.BAD_REQUEST);
     }
     next();
-    
-   } catch (error) {
+  } catch (error) {
     ErrorResponse.error = error;
-        return res
-        .status(error.statusCode)
-        .json(ErrorResponse);}
-   
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
 }
 async function passRole(req, res, next) {
-    try {
-     const userRoles = await UserService.getRole({userId: req.user});
+  try {
+    const incomeingUrl = req.url;
+    const incomeingMethod = req.method;
 
-    const rolesArray=[];
+    if (isPublicRequest(incomeingUrl, incomeingMethod)) {
+      next();
+      return;
+    }
+    const userRoles = await UserService.getRole({ userId: req.user });
 
-    userRoles.forEach(role => {
-    
-        rolesArray.push(role.name);
+    const rolesArray = [];
+
+    userRoles.forEach((role) => {
+      rolesArray.push(role.name);
     });
-    
-    req.headers['user-roles'] = rolesArray;
-    req.headers['user'] = req.user;
+    console.log(rolesArray);
+    req.headers["user-roles"] = rolesArray;
+    req.headers["user"] = req.user;
     // req.setHeader('user-roles', rolesArray);
 
-    
-     next();
-     
-    } catch (error) {
-        console.log(error);
-     ErrorResponse.error = error;
-         return res
-         .status(error.statusCode)
-         .json(ErrorResponse);}
-    
- }
-
-
-module.exports={
-    
-    checkAuth,
-    isAdmin,
-    passRole
+    next();
+  } catch (error) {
+    console.log(error);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
 }
+
+module.exports = {
+  checkAuth,
+  isAdmin,
+  passRole,
+};
